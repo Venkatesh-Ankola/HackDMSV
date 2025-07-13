@@ -1,0 +1,2218 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HackDMSV - Patch Management</title>
+    <style>
+      /* Reset and Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  /* Color Palette */
+  --primary-900: #0f172a;
+  --primary-800: #1e293b;
+  --primary-700: #334155;
+  --primary-600: #475569;
+  --primary-500: #64748b;
+  --primary-400: #94a3b8;
+  --primary-300: #cbd5e1;
+  --primary-200: #e2e8f0;
+  --primary-100: #f1f5f9;
+  --primary-50: #f8fafc;
+
+  /* Accent Colors */
+  --accent-primary: #6366f1;
+  --accent-primary-light: #818cf8;
+  --accent-primary-dark: #4f46e5;
+  --accent-secondary: #06b6d4;
+  --accent-secondary-light: #22d3ee;
+  --accent-secondary-dark: #0891b2;
+
+  /* Status Colors */
+  --success: #10b981;
+  --success-light: #34d399;
+  --success-dark: #059669;
+  --warning: #f59e0b;
+  --warning-light: #fbbf24;
+  --warning-dark: #d97706;
+  --error: #ef4444;
+  --error-light: #f87171;
+  --error-dark: #dc2626;
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(
+    135deg,
+    var(--accent-primary) 0%,
+    var(--accent-secondary) 100%
+  );
+  --gradient-secondary: linear-gradient(
+    135deg,
+    var(--primary-800) 0%,
+    var(--primary-700) 100%
+  );
+  --gradient-accent: linear-gradient(
+    135deg,
+    var(--accent-primary-light) 0%,
+    var(--accent-primary-dark) 100%
+  );
+  --gradient-success: linear-gradient(
+    135deg,
+    var(--success-light) 0%,
+    var(--success-dark) 100%
+  );
+
+  /* Typography */
+  --font-primary: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  --spacing-3xl: 4rem;
+
+  /* Borders */
+  --border-radius-sm: 0.375rem;
+  --border-radius-md: 0.5rem;
+  --border-radius-lg: 0.75rem;
+  --border-radius-xl: 1rem;
+  --border-radius-2xl: 1.5rem;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+  /* Animations */
+  --transition-fast: 150ms ease-in-out;
+  --transition-normal: 300ms ease-in-out;
+  --transition-slow: 500ms ease-in-out;
+}
+
+body {
+  font-family: var(--font-primary);
+  background: linear-gradient(
+    135deg,
+    var(--primary-50) 0%,
+    var(--primary-100) 100%
+  );
+  color: var(--primary-800);
+  line-height: 1.6;
+  min-height: 100vh;
+  font-size: 16px;
+}
+
+/* Navigation */
+.navbar {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--primary-200);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-lg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 70px;
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.brand-icon {
+  width: 45px;
+  height: 45px;
+  background: var(--gradient-primary);
+  border-radius: var(--border-radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.5rem;
+  box-shadow: var(--shadow-md);
+}
+
+.brand-text h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--primary-900);
+  margin-bottom: -2px;
+}
+
+.brand-text span {
+  font-size: 0.875rem;
+  color: var(--primary-600);
+  font-weight: 500;
+}
+
+.nav-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.nav-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: transparent;
+  border: 1px solid var(--primary-200);
+  border-radius: var(--border-radius-md);
+  color: var(--primary-700);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.nav-btn:hover {
+  background: var(--primary-50);
+  border-color: var(--primary-300);
+  color: var(--primary-800);
+}
+
+/* Main Content */
+.main-content {
+  padding: var(--spacing-xl) 0;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-lg);
+}
+
+/* Hero Section */
+.hero-section {
+  margin-bottom: var(--spacing-3xl);
+}
+
+.hero-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-3xl);
+  align-items: center;
+}
+
+.hero-text h2 {
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--primary-900);
+  margin-bottom: var(--spacing-lg);
+  line-height: 1.1;
+}
+
+.hero-text p {
+  font-size: 1.25rem;
+  color: var(--primary-600);
+  margin-bottom: var(--spacing-2xl);
+  line-height: 1.7;
+}
+
+.hero-stats {
+  display: flex;
+  gap: var(--spacing-xl);
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.stat-item i {
+  width: 40px;
+  height: 40px;
+  background: var(--gradient-primary);
+  border-radius: var(--border-radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.25rem;
+}
+
+.stat-item div strong {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary-900);
+}
+
+.stat-item div span {
+  font-size: 0.875rem;
+  color: var(--primary-600);
+}
+
+/* Hero Visual */
+.hero-visual {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.security-illustration {
+  position: relative;
+  width: 300px;
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.shield-container {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gradient-primary);
+  border-radius: var(--border-radius-2xl);
+  box-shadow: var(--shadow-2xl);
+}
+
+.shield-container i {
+  font-size: 3rem;
+  color: white;
+  z-index: 2;
+}
+
+.pulse-ring {
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  border: 3px solid var(--accent-primary);
+  border-radius: 50%;
+  opacity: 0.6;
+  animation: pulse 2s infinite;
+}
+
+.pulse-ring-2 {
+  width: 240px;
+  height: 240px;
+  animation-delay: 1s;
+  opacity: 0.4;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(1.2);
+    opacity: 0;
+  }
+}
+
+/* Section Headers */
+.section-header {
+  text-align: center;
+  margin-bottom: var(--spacing-2xl);
+}
+
+.section-header h3 {
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--primary-900);
+  margin-bottom: var(--spacing-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+}
+
+.section-header h3 i {
+  font-size: 1.5rem;
+  color: var(--accent-primary);
+}
+
+.section-header p {
+  font-size: 1.125rem;
+  color: var(--primary-600);
+}
+
+/* Analysis Section */
+.analysis-section {
+  margin-bottom: var(--spacing-3xl);
+}
+
+.analysis-card {
+  background: white;
+  border-radius: var(--border-radius-2xl);
+  padding: var(--spacing-2xl);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--primary-200);
+}
+
+.input-section {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.input-group {
+  margin-bottom: var(--spacing-xl);
+}
+
+.input-label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-weight: 600;
+  color: var(--primary-800);
+  margin-bottom: var(--spacing-md);
+  font-size: 1.125rem;
+}
+
+.input-label i {
+  color: var(--accent-primary);
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.target-input {
+  width: 100%;
+  padding: var(--spacing-lg) var(--spacing-xl);
+  padding-right: 100px;
+  border: 2px solid var(--primary-200);
+  border-radius: var(--border-radius-xl);
+  font-size: 1.125rem;
+  font-family: var(--font-mono);
+  background: var(--primary-50);
+  color: var(--primary-800);
+  transition: all var(--transition-normal);
+}
+
+.target-input:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  background: white;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+.input-actions {
+  position: absolute;
+  right: var(--spacing-sm);
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.input-btn {
+  width: 36px;
+  height: 36px;
+  background: var(--primary-100);
+  border: 1px solid var(--primary-200);
+  border-radius: var(--border-radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-600);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.input-btn:hover {
+  background: var(--primary-200);
+  color: var(--primary-800);
+}
+
+.input-help {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+  color: var(--primary-500);
+  font-size: 0.875rem;
+}
+
+.input-help i {
+  color: var(--accent-secondary);
+}
+
+/* Scan Options */
+.scan-options {
+  margin-bottom: var(--spacing-xl);
+}
+
+.option-group {
+  text-align: center;
+}
+
+.option-label {
+  display: block;
+  font-weight: 600;
+  color: var(--primary-800);
+  margin-bottom: var(--spacing-md);
+}
+
+.option-buttons {
+  display: flex;
+  gap: var(--spacing-md);
+  justify-content: center;
+}
+
+.option-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-lg) var(--spacing-xl);
+  background: var(--primary-50);
+  border: 2px solid var(--primary-200);
+  border-radius: var(--border-radius-lg);
+  color: var(--primary-700);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  min-width: 120px;
+}
+
+.option-btn:hover {
+  background: var(--primary-100);
+  border-color: var(--primary-300);
+  transform: translateY(-2px);
+}
+
+.option-btn.active {
+  background: var(--gradient-primary);
+  border-color: var(--accent-primary);
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+
+.option-btn i {
+  font-size: 1.5rem;
+}
+
+/* Action Section */
+.action-section {
+  text-align: center;
+}
+
+.analyze-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg) var(--spacing-2xl);
+  background: var(--gradient-primary);
+  border: none;
+  border-radius: var(--border-radius-xl);
+  color: white;
+  font-size: 1.25rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+
+.analyze-btn:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-2xl);
+}
+
+.analyze-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-shine {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transition: left var(--transition-slow);
+}
+
+.analyze-btn:hover .btn-shine {
+  left: 100%;
+}
+
+/* Loading Section */
+.loading-section {
+  margin-bottom: var(--spacing-3xl);
+}
+
+.loading-card {
+  background: white;
+  border-radius: var(--border-radius-2xl);
+  padding: var(--spacing-2xl);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--primary-200);
+  text-align: center;
+}
+
+.loading-animation {
+  position: relative;
+  width: 200px;
+  height: 120px;
+  margin: 0 auto var(--spacing-xl);
+  background: var(--gradient-secondary);
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+}
+
+.scanner-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--gradient-primary);
+  animation: scan 2s infinite;
+  box-shadow: 0 0 20px var(--accent-primary);
+}
+
+@keyframes scan {
+  0% {
+    left: 0;
+  }
+  100% {
+    left: calc(100% - 4px);
+  }
+}
+
+.loading-dots {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  background: var(--accent-primary);
+  border-radius: 50%;
+  animation: bounce 1.5s infinite;
+}
+
+.dot:nth-child(2) {
+  animation-delay: 0.5s;
+}
+.dot:nth-child(3) {
+  animation-delay: 1s;
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.loading-content h4 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--primary-900);
+  margin-bottom: var(--spacing-md);
+}
+
+.loading-content p {
+  font-size: 1.125rem;
+  color: var(--primary-600);
+  margin-bottom: var(--spacing-xl);
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--primary-200);
+  border-radius: var(--border-radius-sm);
+  overflow: hidden;
+  margin-bottom: var(--spacing-xl);
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--gradient-primary);
+  border-radius: var(--border-radius-sm);
+  width: 0%;
+  transition: width var(--transition-normal);
+  animation: progressGlow 2s infinite;
+}
+
+@keyframes progressGlow {
+  0%,
+  100% {
+    box-shadow: 0 0 5px var(--accent-primary);
+  }
+  50% {
+    box-shadow: 0 0 20px var(--accent-primary);
+  }
+}
+
+.loading-stats {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-xl);
+  flex-wrap: wrap;
+}
+
+.loading-stats .stat {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  color: var(--primary-600);
+  font-size: 0.875rem;
+}
+
+.loading-stats .stat i {
+  color: var(--accent-primary);
+  animation: pulse 2s infinite;
+}
+
+/* Results Section */
+.results-section {
+  margin-bottom: var(--spacing-3xl);
+}
+
+.results-card {
+  background: white;
+  border-radius: var(--border-radius-2xl);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--primary-200);
+  overflow: hidden;
+}
+
+.report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-xl) var(--spacing-2xl);
+  background: var(--primary-50);
+  border-bottom: 1px solid var(--primary-200);
+}
+
+.report-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.report-status {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-weight: 600;
+  color: var(--success-dark);
+  font-size: 1.125rem;
+}
+
+.report-status i {
+  color: var(--success);
+}
+
+.report-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  color: var(--primary-500);
+  font-size: 0.875rem;
+}
+
+.report-actions {
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border: 1px solid var(--primary-200);
+  border-radius: var(--border-radius-md);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.action-btn.secondary {
+  background: white;
+  color: var(--primary-700);
+}
+
+.action-btn.secondary:hover {
+  background: var(--primary-50);
+  border-color: var(--primary-300);
+}
+
+.action-btn.primary {
+  background: var(--gradient-primary);
+  color: white;
+  border-color: transparent;
+}
+
+.action-btn.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.report-viewer {
+  padding: var(--spacing-xl);
+}
+
+#pdfViewer {
+  border: 1px solid var(--primary-200);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Chatbot Section */
+.chatbot-section {
+  margin-bottom: var(--spacing-3xl);
+}
+
+.chatbot-card {
+  background: white;
+  border-radius: var(--border-radius-2xl);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--primary-200);
+  overflow: hidden;
+}
+
+.chatbot-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-xl) var(--spacing-2xl);
+  background: var(--gradient-secondary);
+  color: white;
+}
+
+.chatbot-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.chatbot-avatar {
+  width: 50px;
+  height: 50px;
+  background: var(--gradient-primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  box-shadow: var(--shadow-md);
+}
+
+.chatbot-details h4 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: var(--spacing-xs);
+}
+
+.chatbot-status {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: 0.875rem;
+  color: var(--success-light);
+}
+
+.chatbot-status i {
+  font-size: 0.5rem;
+  animation: pulse 2s infinite;
+}
+
+.chatbot-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.chat-action-btn {
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--border-radius-md);
+  color: white;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chat-action-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.chatbot-messages {
+  height: 400px;
+  overflow-y: auto;
+  padding: var(--spacing-xl);
+  background: var(--primary-50);
+  scroll-behavior: smooth;
+}
+
+.chatbot-messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chatbot-messages::-webkit-scrollbar-track {
+  background: var(--primary-200);
+  border-radius: var(--border-radius-sm);
+}
+
+.chatbot-messages::-webkit-scrollbar-thumb {
+  background: var(--primary-400);
+  border-radius: var(--border-radius-sm);
+}
+
+.chatbot-messages::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-500);
+}
+
+.welcome-message {
+  margin-bottom: var(--spacing-xl);
+}
+
+.chat-message {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+  max-width: 80%;
+}
+
+.chat-message.user {
+  margin-left: auto;
+  flex-direction: row-reverse;
+}
+
+.chat-message.bot {
+  margin-right: auto;
+}
+
+.message-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.125rem;
+  flex-shrink: 0;
+}
+
+.chat-message.user .message-avatar {
+  background: var(--gradient-primary);
+  color: white;
+}
+
+.chat-message.bot .message-avatar {
+  background: var(--gradient-secondary);
+  color: white;
+}
+
+.message-content {
+  background: white;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--primary-200);
+}
+
+.chat-message.user .message-content {
+  background: var(--gradient-primary);
+  color: white;
+  border-color: transparent;
+}
+
+.chat-message.bot .message-content {
+  background: white;
+  color: var(--primary-800);
+}
+
+.message-content p {
+  margin: 0;
+  line-height: 1.6;
+}
+
+.chatbot-form {
+  padding: var(--spacing-xl);
+  background: white;
+  border-top: 1px solid var(--primary-200);
+}
+
+.chat-input-wrapper {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+#chatbotInput {
+  flex: 1;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border: 2px solid var(--primary-200);
+  border-radius: var(--border-radius-lg);
+  font-size: 1rem;
+  background: var(--primary-50);
+  color: var(--primary-800);
+  transition: all var(--transition-fast);
+}
+
+#chatbotInput:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  background: white;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+#chatbotSendBtn {
+  width: 48px;
+  height: 48px;
+  background: var(--gradient-primary);
+  border: none;
+  border-radius: var(--border-radius-lg);
+  color: white;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.125rem;
+}
+
+#chatbotSendBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.quick-questions {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.quick-btn {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--primary-100);
+  border: 1px solid var(--primary-200);
+  border-radius: var(--border-radius-md);
+  color: var(--primary-700);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.quick-btn:hover {
+  background: var(--primary-200);
+  color: var(--primary-800);
+  transform: translateY(-1px);
+}
+
+/* Utility Classes */
+.hidden {
+  display: none !important;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hero-content {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-2xl);
+    text-align: center;
+  }
+
+  .hero-text h2 {
+    font-size: 2.5rem;
+  }
+
+  .hero-stats {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .nav-content {
+    padding: 0 var(--spacing-md);
+  }
+
+  .nav-actions {
+    display: none;
+  }
+
+  .container {
+    padding: 0 var(--spacing-md);
+  }
+
+  .analysis-card,
+  .results-card,
+  .chatbot-card {
+    padding: var(--spacing-lg);
+  }
+
+  .option-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .option-btn {
+    width: 100%;
+    max-width: 200px;
+  }
+
+  .report-header {
+    flex-direction: column;
+    gap: var(--spacing-md);
+    align-items: flex-start;
+  }
+
+  .report-actions {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .loading-stats {
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+
+  .chat-message {
+    max-width: 95%;
+  }
+
+  .quick-questions {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-text h2 {
+    font-size: 2rem;
+  }
+
+  .section-header h3 {
+    font-size: 1.5rem;
+  }
+
+  .analyze-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .input-actions {
+    position: static;
+    margin-top: var(--spacing-md);
+    justify-content: center;
+  }
+
+  .target-input {
+    padding-right: var(--spacing-xl);
+  }
+
+  .chatbot-messages {
+    height: 300px;
+  }
+}
+
+    </style>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="app-container">
+      <!-- Navigation -->
+      <nav class="navbar">
+        <div class="nav-content">
+          <div class="nav-brand">
+            <div class="brand-icon">
+              <i class="fas fa-shield-alt"></i>
+            </div>
+            <div class="brand-text">
+              <h1>HackDMSV</h1>
+              <span>Vulnerability Management</span>
+            </div>
+          </div>
+          <!-- <div class="nav-actions">
+            <button class="nav-btn">
+              <i class="fas fa-history"></i>
+              <span>History</span>
+            </button>
+            <button class="nav-btn">
+              <i class="fas fa-cog"></i>
+              <span>Settings</span>
+            </button>
+          </div> -->
+        </div>
+      </nav>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <div class="container">
+          <!-- Hero Section -->
+          <section class="hero-section">
+            <div class="hero-content">
+              <div class="hero-text">
+                <h2>AI-Powered Vulnerability Analysis</h2>
+                <p>
+                  Advanced patch management using Large Language Models to
+                  identify, analyze, and provide actionable security
+                  recommendations.
+                </p>
+                <!-- <div class="hero-stats">
+                  <div class="stat-item">
+                    <i class="fas fa-scan"></i>
+                    <div>
+                      <strong>10,000+</strong>
+                      <span>Scans Completed</span>
+                    </div>
+                  </div>
+                  <div class="stat-item">
+                    <i class="fas fa-shield-check"></i>
+                    <div>
+                      <strong>99.9%</strong>
+                      <span>Accuracy Rate</span>
+                    </div>
+                  </div>
+                  <div class="stat-item">
+                    <i class="fas fa-clock"></i>
+                    <div>
+                      <strong>< 2 min</strong>
+                      <span>Average Scan Time</span>
+                    </div>
+                  </div>
+                </div> -->
+              </div>
+              <div class="hero-visual">
+                <div class="security-illustration">
+                  <div class="shield-container">
+                    <i class="fas fa-shield-alt"></i>
+                    <div class="pulse-ring"></div>
+                    <div class="pulse-ring pulse-ring-2"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Analysis Section -->
+          <section class="analysis-section">
+            <div class="section-header">
+              <h3>
+                <i class="fas fa-crosshairs"></i>
+                Target Analysis
+              </h3>
+              <p>
+                Enter a web link or IP address to begin vulnerability assessment
+              </p>
+            </div>
+
+            <div class="analysis-card">
+              <div class="input-section">
+                <div class="input-group">
+                  <label for="xmlInput" class="input-label">
+                    <i class="fas fa-globe"></i>
+                    Target URL or IP Address
+                  </label>
+                  <div class="input-wrapper">
+                    <input
+                      type="text"
+                      id="xmlInput"
+                      placeholder="e.g., scanme.nmap.org or 192.168.1.1"
+                      class="target-input"
+                    />
+                    <div class="input-actions">
+                      <button class="input-btn" type="button" id="pasteBtn">
+                        <i class="fas fa-paste"></i>
+                      </button>
+                      <button class="input-btn" type="button" id="clearBtn">
+                        <i class="fas fa-times"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="input-help">
+                    <i class="fas fa-info-circle"></i>
+                    <span
+                      >Supports domains, IP addresses, and URLs with ports</span
+                    >
+                  </div>
+                </div>
+
+                <!-- <div class="scan-options">
+                  <div class="option-group">
+                    <label class="option-label">Scan Type:</label>
+                    <div class="option-buttons">
+                      <button class="option-btn active" data-scan="quick">
+                        <i class="fas fa-bolt"></i>
+                        Quick Scan
+                      </button>
+                      <button class="option-btn" data-scan="comprehensive">
+                        <i class="fas fa-microscope"></i>
+                        Comprehensive
+                      </button>
+                      <button class="option-btn" data-scan="custom">
+                        <i class="fas fa-cogs"></i>
+                        Custom
+                      </button>
+                    </div>
+                  </div>
+                </div> -->
+
+                <div class="action-section">
+                  <button id="analyseBtn" class="analyze-btn" disabled>
+                    <i class="fas fa-play"></i>
+                    <span>Start Analysis</span>
+                    <div class="btn-shine"></div>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Loading Section -->
+          <section class="loading-section hidden" id="loading">
+            <div class="loading-card">
+              <div class="loading-animation">
+                <div class="scanner-line"></div>
+                <div class="loading-dots">
+                  <div class="dot"></div>
+                  <div class="dot"></div>
+                  <div class="dot"></div>
+                </div>
+              </div>
+              <div class="loading-content">
+                <h4>Analyzing Target</h4>
+                <p id="loadingStatus">Initializing security scan...</p>
+                <div class="progress-bar">
+                  <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="loading-stats">
+                  <div class="stat">
+                    <i class="fas fa-search"></i>
+                    <span>Scanning ports...</span>
+                  </div>
+                  <div class="stat">
+                    <i class="fas fa-bug"></i>
+                    <span>Detecting vulnerabilities...</span>
+                  </div>
+                  <div class="stat">
+                    <i class="fas fa-brain"></i>
+                    <span>AI analysis in progress...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Results Section -->
+          <section class="results-section hidden" id="resultSection">
+            <div class="section-header">
+              <h3>
+                <i class="fas fa-file-shield"></i>
+                Security Report
+              </h3>
+              <p>
+                Comprehensive vulnerability analysis and patch recommendations
+              </p>
+            </div>
+
+            <div class="results-card">
+              <div class="report-header">
+                <div class="report-info">
+                  <div class="report-status">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Analysis Complete</span>
+                  </div>
+                  <div class="report-meta">
+                    <span id="reportDate"></span>
+                    <span>•</span>
+                    <span id="reportDuration"></span>
+                  </div>
+                </div>
+                <div class="report-actions">
+                  <button class="action-btn secondary" id="shareBtn">
+                    <i class="fas fa-share-alt"></i>
+                    Share
+                  </button>
+                  <button class="action-btn primary" id="downloadBtn">
+                    <i class="fas fa-download"></i>
+                    Download PDF
+                  </button>
+                </div>
+              </div>
+
+              <div class="report-viewer">
+                <iframe id="pdfViewer" width="100%" height="600px"></iframe>
+              </div>
+            </div>
+          </section>
+
+          <!-- Chatbot Section -->
+          <section class="chatbot-section hidden" id="chatbotSection">
+            <div class="section-header">
+              <h3>
+                <i class="fas fa-robot"></i>
+                AI Assistant
+              </h3>
+              <p>Ask questions about your security report</p>
+            </div>
+
+            <div class="chatbot-card">
+              <div class="chatbot-header">
+                <div class="chatbot-info">
+                  <div class="chatbot-avatar">
+                    <i class="fas fa-robot"></i>
+                  </div>
+                  <div class="chatbot-details">
+                    <h4>Security Assistant</h4>
+                    <span class="chatbot-status" id="chatbotStatus">
+                      <i class="fas fa-circle"></i>
+                      Online
+                    </span>
+                  </div>
+                </div>
+                <div class="chatbot-actions">
+                  <button class="chat-action-btn" id="clearChatBtn">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                  <button class="chat-action-btn" id="minimizeBtn">
+                    <i class="fas fa-minus"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="chatbot-messages" id="chatbotMessages">
+                <div class="welcome-message">
+                  <div class="chat-message bot">
+                    <div class="message-avatar">
+                      <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="message-content">
+                      <p>
+                        Hello! I'm your security assistant. I can help you
+                        understand your vulnerability report, explain findings,
+                        and provide remediation guidance. What would you like to
+                        know?
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <form id="chatbotForm" class="chatbot-form">
+                <div class="chat-input-wrapper">
+                  <input
+                    type="text"
+                    id="chatbotInput"
+                    placeholder="Ask about vulnerabilities, patches, or security recommendations..."
+                    autocomplete="off"
+                  />
+                  <button type="submit" id="chatbotSendBtn">
+                    <i class="fas fa-paper-plane"></i>
+                  </button>
+                </div>
+                <div class="quick-questions">
+                  <button
+                    type="button"
+                    class="quick-btn"
+                    data-question="What are the critical vulnerabilities?"
+                  >
+                    Critical Issues
+                  </button>
+                  <button
+                    type="button"
+                    class="quick-btn"
+                    data-question="How can I patch these vulnerabilities?"
+                  >
+                    Patch Guide
+                  </button>
+                  <button
+                    type="button"
+                    class="quick-btn"
+                    data-question="What's the risk level?"
+                  >
+                    Risk Assessment
+                  </button>
+                </div>
+              </form>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+  // DOM Elements
+  const analyseBtn = document.getElementById("analyseBtn");
+  const inputField = document.getElementById("xmlInput");
+  const loadingSection = document.getElementById("loading");
+  const resultSection = document.getElementById("resultSection");
+  const pdfViewer = document.getElementById("pdfViewer");
+  const chatbotSection = document.getElementById("chatbotSection");
+  const pasteBtn = document.getElementById("pasteBtn");
+  const clearBtn = document.getElementById("clearBtn");
+  const progressFill = document.getElementById("progressFill");
+  const loadingStatus = document.getElementById("loadingStatus");
+  const reportDate = document.getElementById("reportDate");
+  const reportDuration = document.getElementById("reportDuration");
+  const minimizeBtn = document.getElementById("minimizeBtn");
+
+  // State
+  let pollInterval;
+  let scanStartTime;
+  let selectedScanType = "quick";
+  let currentReportId = null; // Store the current report ID
+
+  // Loading messages
+  const loadingMessages = [
+    "Initializing security scan...",
+    "Scanning target ports...",
+    "Detecting services...",
+    "Analyzing vulnerabilities...",
+    "Running security checks...",
+    "AI analysis in progress...",
+    "Generating recommendations...",
+    "Finalizing report...",
+  ];
+
+  // Initialize
+  init();
+
+  function init() {
+    setupEventListeners();
+    setupScanOptions();
+    setupQuickQuestions();
+    updateAnalyzeButton();
+    setupChatbotMinimize();
+  }
+
+  function setupEventListeners() {
+    // Input field events
+    inputField.addEventListener("input", handleInputChange);
+    inputField.addEventListener("keypress", handleKeyPress);
+
+    // Button events
+    analyseBtn.addEventListener("click", handleAnalyze);
+    pasteBtn.addEventListener("click", handlePaste);
+    clearBtn.addEventListener("click", handleClear);
+
+    // Download button
+    const downloadBtn = document.getElementById("downloadBtn");
+    if (downloadBtn) {
+      downloadBtn.addEventListener("click", handleDownload);
+    }
+
+    // Share button
+    const shareBtn = document.getElementById("shareBtn");
+    if (shareBtn) {
+      shareBtn.addEventListener("click", handleShare);
+    }
+
+    // Chatbot events
+    setupChatbot();
+  }
+
+  function setupScanOptions() {
+    const optionButtons = document.querySelectorAll(".option-btn");
+    optionButtons.forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        // Remove active class from all buttons
+        optionButtons.forEach((b) => b.classList.remove("active"));
+
+        // Add active class to clicked button
+        btn.classList.add("active");
+
+        // Update selected scan type
+        selectedScanType = btn.dataset.scan;
+
+        // Add ripple effect
+        createRipple(e, btn);
+      });
+    });
+  }
+
+  function setupQuickQuestions() {
+    const quickBtns = document.querySelectorAll(".quick-btn");
+    quickBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const question = btn.dataset.question;
+        const chatInput = document.getElementById("chatbotInput");
+        if (chatInput) {
+          chatInput.value = question;
+          // Trigger form submission
+          const chatForm = document.getElementById("chatbotForm");
+          if (chatForm) {
+            const submitEvent = new Event("submit", {
+              bubbles: true,
+              cancelable: true,
+            });
+            chatForm.dispatchEvent(submitEvent);
+          }
+        }
+      });
+    });
+  }
+
+  function setupChatbotMinimize() {
+    if (minimizeBtn) {
+      minimizeBtn.addEventListener("click", () => {
+        const chatbotCard = document.querySelector(".chatbot-card");
+        if (chatbotCard) {
+          chatbotCard.classList.toggle("minimized");
+          const icon = minimizeBtn.querySelector("i");
+          if (chatbotCard.classList.contains("minimized")) {
+            icon.className = "fas fa-plus";
+          } else {
+            icon.className = "fas fa-minus";
+          }
+        }
+      });
+    }
+  }
+
+  function handleInputChange() {
+    updateAnalyzeButton();
+    validateInput();
+  }
+
+  function validateInput() {
+    const value = inputField.value.trim();
+    const inputWrapper = inputField.closest(".input-wrapper");
+
+    if (value) {
+      // Basic validation for IP or domain
+      const isValidIP =
+        /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(
+          value
+        );
+      const isValidDomain =
+        /^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/.test(
+          value
+        );
+      const isValidURL = /^https?:\/\/.+/.test(value);
+
+      if (isValidIP || isValidDomain || isValidURL) {
+        inputField.style.borderColor = "var(--success, #10B981)";
+        inputField.classList.remove("error");
+      } else {
+        inputField.style.borderColor = "var(--warning, #F59E0B)";
+        inputField.classList.add("warning");
+      }
+    } else {
+      inputField.style.borderColor = "var(--primary-200, #E5E7EB)";
+      inputField.classList.remove("error", "warning");
+    }
+  }
+
+  function handleKeyPress(e) {
+    if (e.key === "Enter" && !analyseBtn.disabled) {
+      handleAnalyze();
+    }
+  }
+
+  function updateAnalyzeButton() {
+    const hasInput = inputField.value.trim() !== "";
+    analyseBtn.disabled = !hasInput;
+
+    if (hasInput) {
+      analyseBtn.classList.add("ready");
+    } else {
+      analyseBtn.classList.remove("ready");
+    }
+  }
+
+  async function handlePaste() {
+    try {
+      const text = await navigator.clipboard.readText();
+      inputField.value = text;
+      updateAnalyzeButton();
+      validateInput();
+
+      // Show feedback
+      showToast("Pasted from clipboard", "success");
+    } catch (err) {
+      // Fallback for browsers that don't support clipboard API
+      inputField.focus();
+      showToast("Please paste manually (Ctrl+V)", "info");
+    }
+  }
+
+  function handleClear() {
+    inputField.value = "";
+    updateAnalyzeButton();
+    inputField.focus();
+
+    // Reset styles
+    inputField.style.borderColor = "var(--primary-200, #E5E7EB)";
+    inputField.classList.remove("error", "warning");
+  }
+
+  async function handleAnalyze() {
+    const inputValue = inputField.value.trim();
+    if (!inputValue) return;
+
+    // Disable button to prevent multiple clicks
+    analyseBtn.disabled = true;
+
+    // Start scan
+    scanStartTime = Date.now();
+    showLoading();
+
+    try {
+      const triggerResponse = await fetch(
+        `http://hackdmsv-env.eba-d9sffcsx.ap-south-1.elasticbeanstalk.com/trigger_report?target=${encodeURIComponent(
+          inputValue
+        )}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!triggerResponse.ok) {
+        throw new Error(`HTTP error! status: ${triggerResponse.status}`);
+      }
+
+      const responseData = await triggerResponse.json();
+      currentReportId = responseData.report_id; // Store the report ID
+      console.log("Report ID:", currentReportId);
+
+      // Start progress animation
+      animateProgress();
+
+      // Start polling
+      startPolling(currentReportId);
+    } catch (error) {
+      console.error("Analysis failed:", error);
+      hideLoading();
+      showToast("Failed to start analysis: " + error.message, "error");
+      analyseBtn.disabled = false; // Re-enable button
+    }
+  }
+
+  function showLoading() {
+    loadingSection.classList.remove("hidden");
+    resultSection.classList.add("hidden");
+    chatbotSection.classList.add("hidden");
+
+    // Scroll to loading section
+    loadingSection.scrollIntoView({ behavior: "smooth" });
+  }
+
+  function hideLoading() {
+    loadingSection.classList.add("hidden");
+    if (pollInterval) {
+      clearInterval(pollInterval);
+    }
+
+    // Reset progress
+    if (progressFill) {
+      progressFill.style.width = "0%";
+    }
+
+    // Re-enable analyze button
+    analyseBtn.disabled = false;
+    updateAnalyzeButton();
+  }
+
+  function animateProgress() {
+    let progress = 0;
+    let messageIndex = 0;
+
+    const progressInterval = setInterval(() => {
+      progress += Math.random() * 10 + 5; // More consistent progress
+
+      if (progress >= 95) {
+        progress = 95; // Don't complete until actual completion
+        clearInterval(progressInterval);
+      }
+
+      if (progressFill) {
+        progressFill.style.width = progress + "%";
+      }
+
+      // Update status message
+      if (messageIndex < loadingMessages.length - 1 && loadingStatus) {
+        loadingStatus.textContent = loadingMessages[messageIndex];
+        messageIndex++;
+      }
+    }, 2000);
+
+    // Store interval reference
+    pollInterval = progressInterval;
+  }
+
+  function startPolling(reportId) {
+    if (pollInterval) {
+      clearInterval(pollInterval);
+    }
+
+    pollInterval = setInterval(async () => {
+      try {
+        const statusRes = await fetch(
+          `http://hackdmsv-env.eba-d9sffcsx.ap-south-1.elasticbeanstalk.com/status_report/${reportId}`
+        );
+
+        if (!statusRes.ok) {
+          throw new Error(`Status check failed: ${statusRes.status}`);
+        }
+
+        const responseData = await statusRes.json();
+        const status = responseData.status;
+        console.log("Status:", status);
+
+        if (status === "done") {
+          clearInterval(pollInterval);
+
+          // Complete progress
+          if (progressFill) {
+            progressFill.style.width = "100%";
+          }
+          if (loadingStatus) {
+            loadingStatus.textContent = "Analysis complete!";
+          }
+
+          // Wait a moment before showing results
+          setTimeout(() => {
+            showResults(reportId);
+          }, 1000);
+        } else if (status === "failed") {
+          clearInterval(pollInterval);
+          hideLoading();
+          showToast("Report generation failed", "error");
+        } else {
+          console.log("Still processing...");
+        }
+      } catch (error) {
+        console.error("Polling error:", error);
+        clearInterval(pollInterval);
+        hideLoading();
+        showToast("Connection error during analysis", "error");
+      }
+    }, 2000);
+  }
+
+  async function showResults(reportId) {
+    try {
+      const pdfRes = await fetch(
+        `http://hackdmsv-env.eba-d9sffcsx.ap-south-1.elasticbeanstalk.com/get_report/${reportId}`
+      );
+
+      if (!pdfRes.ok) {
+        throw new Error(`Failed to fetch report: ${pdfRes.status}`);
+      }
+
+      const blob = await pdfRes.blob();
+      const url = URL.createObjectURL(blob);
+
+      if (pdfViewer) {
+        pdfViewer.src = url;
+      }
+
+      // Update report metadata
+      const scanDuration = Math.round((Date.now() - scanStartTime) / 1000);
+      if (reportDate) {
+        reportDate.textContent = new Date().toLocaleDateString();
+      }
+      if (reportDuration) {
+        reportDuration.textContent = `${scanDuration}s`;
+      }
+
+      // Hide loading and show results
+      hideLoading();
+      resultSection.classList.remove("hidden");
+      chatbotSection.classList.remove("hidden");
+
+      // Scroll to results
+      resultSection.scrollIntoView({ behavior: "smooth" });
+
+      // Setup download functionality
+      setupDownload(url);
+
+      // Show success message
+      showToast("Analysis completed successfully!", "success");
+    } catch (error) {
+      console.error("Error showing results:", error);
+      hideLoading();
+      showToast("Failed to load report", "error");
+    }
+  }
+
+  function setupDownload(url) {
+    const downloadBtn = document.getElementById("downloadBtn");
+    if (downloadBtn) {
+      downloadBtn.onclick = () => {
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `hackdmsv_report_${Date.now()}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        showToast("Report downloaded successfully!", "success");
+      };
+    }
+  }
+
+  function handleDownload() {
+    // This will be set up by setupDownload when results are shown
+    showToast("Please wait for the analysis to complete", "info");
+  }
+
+  function handleShare() {
+    if (navigator.share) {
+      navigator
+        .share({
+          title: "HackDMSV Security Report",
+          text: "Check out this security vulnerability report",
+          url: window.location.href,
+        })
+        .catch((err) => console.log("Error sharing:", err));
+    } else {
+      // Fallback - copy to clipboard
+      navigator.clipboard
+        .writeText(window.location.href)
+        .then(() => showToast("Link copied to clipboard", "success"))
+        .catch(() => showToast("Failed to copy link", "error"));
+    }
+  }
+
+  function setupChatbot() {
+    const chatbotForm = document.getElementById("chatbotForm");
+    const chatbotInput = document.getElementById("chatbotInput");
+    const chatbotMessages = document.getElementById("chatbotMessages");
+    const clearChatBtn = document.getElementById("clearChatBtn");
+
+    if (chatbotForm) {
+      chatbotForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const userMsg = chatbotInput.value.trim();
+        if (!userMsg) return;
+
+        // Add user message
+        addChatMessage(userMsg, "user");
+        chatbotInput.value = "";
+
+        // Add thinking message
+        const thinkingMsg = addChatMessage("Thinking...", "bot");
+
+        try {
+          if (!currentReportId) {
+            updateChatMessage(
+              thinkingMsg,
+              "Please run an analysis first to generate a report."
+            );
+            return;
+          }
+
+          const response = await fetch(
+            `http://hackdmsv-env.eba-d9sffcsx.ap-south-1.elasticbeanstalk.com/query_report/${encodeURIComponent(
+              currentReportId
+            )}?question=${encodeURIComponent(userMsg)}`,
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error(`API error: ${response.status}`);
+          }
+
+          const data = await response.json();
+
+          // Update thinking message with response
+          updateChatMessage(
+            thinkingMsg,
+            data.answer || "Sorry, I couldn't understand that question."
+          );
+        } catch (err) {
+          console.error("Chatbot error:", err);
+          updateChatMessage(
+            thinkingMsg,
+            "Sorry, there was a problem connecting to the AI assistant. Please try again."
+          );
+        }
+      });
+    }
+
+    if (clearChatBtn) {
+      clearChatBtn.addEventListener("click", () => {
+        if (chatbotMessages) {
+          // Keep only the welcome message
+          const welcomeMsg = chatbotMessages.querySelector(".welcome-message");
+          chatbotMessages.innerHTML = "";
+          if (welcomeMsg) {
+            chatbotMessages.appendChild(welcomeMsg);
+          }
+          showToast("Chat cleared", "info");
+        }
+      });
+    }
+  }
+
+  function addChatMessage(text, type) {
+    const chatbotMessages = document.getElementById("chatbotMessages");
+    if (!chatbotMessages) return null;
+
+    const messageDiv = document.createElement("div");
+    messageDiv.className = `chat-message ${type}`;
+
+    const avatarDiv = document.createElement("div");
+    avatarDiv.className = "message-avatar";
+    avatarDiv.innerHTML =
+      type === "user"
+        ? '<i class="fas fa-user"></i>'
+        : '<i class="fas fa-robot"></i>';
+
+    const contentDiv = document.createElement("div");
+    contentDiv.className = "message-content";
+    contentDiv.innerHTML = `<p>${escapeHtml(text)}</p>`;
+
+    messageDiv.appendChild(avatarDiv);
+    messageDiv.appendChild(contentDiv);
+
+    chatbotMessages.appendChild(messageDiv);
+    chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+
+    return messageDiv;
+  }
+
+  function updateChatMessage(messageElement, newText) {
+    if (!messageElement) return;
+
+    const contentDiv = messageElement.querySelector(".message-content p");
+    if (contentDiv) {
+      contentDiv.textContent = newText;
+    }
+  }
+
+  function escapeHtml(text) {
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  function createRipple(event, element) {
+    const ripple = document.createElement("span");
+    const rect = element.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    const x = event.clientX - rect.left - size / 2;
+    const y = event.clientY - rect.top - size / 2;
+
+    ripple.style.width = ripple.style.height = size + "px";
+    ripple.style.left = x + "px";
+    ripple.style.top = y + "px";
+    ripple.classList.add("ripple");
+
+    element.appendChild(ripple);
+
+    setTimeout(() => {
+      ripple.remove();
+    }, 600);
+  }
+
+  function showToast(message, type = "info") {
+    // Create toast element
+    const toast = document.createElement("div");
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `
+      <div class="toast-content">
+        <i class="fas fa-${getToastIcon(type)}"></i>
+        <span>${escapeHtml(message)}</span>
+      </div>
+    `;
+
+    // Add toast styles
+    toast.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: ${getToastColor(type)};
+      color: white;
+      padding: 12px 16px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      z-index: 1000;
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+      max-width: 300px;
+      word-wrap: break-word;
+    `;
+
+    document.body.appendChild(toast);
+
+    // Animate in
+    setTimeout(() => {
+      toast.style.transform = "translateX(0)";
+    }, 100);
+
+    // Remove after delay
+    setTimeout(() => {
+      toast.style.transform = "translateX(100%)";
+      setTimeout(() => {
+        if (toast.parentNode) {
+          toast.remove();
+        }
+      }, 300);
+    }, 3000);
+  }
+
+  function getToastIcon(type) {
+    switch (type) {
+      case "success":
+        return "check-circle";
+      case "error":
+        return "exclamation-triangle";
+      case "warning":
+        return "exclamation-circle";
+      default:
+        return "info-circle";
+    }
+  }
+
+  function getToastColor(type) {
+    switch (type) {
+      case "success":
+        return "#10B981";
+      case "error":
+        return "#EF4444";
+      case "warning":
+        return "#F59E0B";
+      default:
+        return "#3B82F6";
+    }
+  }
+
+  // Cleanup on page unload
+  window.addEventListener("beforeunload", () => {
+    if (pollInterval) {
+      clearInterval(pollInterval);
+    }
+  });
+
+  // Add ripple effect styles
+  const style = document.createElement("style");
+  style.textContent = `
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      pointer-events: none;
+      transform: scale(0);
+      animation: ripple-animation 0.6s ease-out;
+    }
+    
+    @keyframes ripple-animation {
+      to {
+        transform: scale(2);
+        opacity: 0;
+      }
+    }
+    
+    .toast-content {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .chatbot-card.minimized .chatbot-messages,
+    .chatbot-card.minimized .chatbot-form {
+      display: none;
+    }
+    
+    .input-wrapper input.warning {
+      border-color: #F59E0B;
+    }
+    
+    .input-wrapper input.error {
+      border-color: #EF4444;
+    }
+    
+    .analyze-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .analyze-btn.ready {
+      background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+    
+    .analyze-btn.ready:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    }
+  `;
+  document.head.appendChild(style);
+});
+
+
+    </script>
+  </body>
+</html>
