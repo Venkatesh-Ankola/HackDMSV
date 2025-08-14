@@ -16,7 +16,7 @@ def extract_text_from_pdf(pdf_path: str) -> str:
 def query_pdf_with_llm(pdf_path: str, question: str) -> str:
     content = extract_text_from_pdf(pdf_path)
 
-    system_prompt = "You are a cybersecurity assistant. Answer concisely and clearly using the report content."
+    system_prompt = "You are a cybersecurity expert for vulnerability patch management. Answer concisely and clearly using the report content. Explain only queries related to nmap and nothing else. even if someone asks cybersecurity questions not related to nmap, you should not answer them."
     user_prompt = f"The following is the PDF content:\n\n{content}\n\nNow answer: {question}"
 
     try:

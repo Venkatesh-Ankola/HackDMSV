@@ -84,16 +84,17 @@ def guess_cpe(product, version, top_k=5):
         top_results = torch.topk(cos_scores, k=5)
         top_matches = []
         print("Top 5 Matches:")
-        for score, idx in zip(top_results.values, top_results.indices):
+        for num, (score, idx) in enumerate(zip(top_results.values, top_results.indices), start=1):
             print(f"CVE: {cve_texts[idx]}, Score: {score:.4f}")
             top_matches.append({
-                "cve_id": "Predicted CPE",  
+                "cve_id": f"Predicted CPE {num}",  # Add numbering
                 "description": cve_texts[idx],  
                 "score": f"{score * 10:.4f}",  
-                "severity": map_severity(score*10),
+                "severity": map_severity(score * 10),
                 "kev": "Unknown",  
                 "reference": "Unknown"  
             })
+
         print(f"Guessed CPE for '{product} {version}': {top_matches}")
         return top_matches
 
