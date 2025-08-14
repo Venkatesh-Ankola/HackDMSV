@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HackDMSV - Patch Management</title>
+    <title>IntelliPatch - Patch Management</title>
     <style>
       /* Reset and Base Styles */
 * {
@@ -119,6 +119,7 @@ body {
 /* Navigation */
 .navbar {
   background: rgba(255, 255, 255, 0.95);
+  background-color: #4d60cf;
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--primary-200);
   position: sticky;
@@ -134,6 +135,16 @@ body {
   justify-content: space-between;
   align-items: center;
   height: 70px;
+}
+
+.nav-brand h1 {
+  color: #fff; /* Light text for title */
+  margin: 0;
+}
+
+.nav-brand span {
+  color: #dfe0e7; /* Slightly muted light color for subtitle */
+  font-size: 0.9em;
 }
 
 .nav-brand {
@@ -158,13 +169,13 @@ body {
 .brand-text h1 {
   font-size: 1.75rem;
   font-weight: 700;
-  color: var(--primary-900);
+  
   margin-bottom: -2px;
 }
 
 .brand-text span {
   font-size: 0.875rem;
-  color: var(--primary-600);
+  
   font-weight: 500;
 }
 
@@ -1189,7 +1200,7 @@ body {
               <i class="fas fa-shield-alt"></i>
             </div>
             <div class="brand-text">
-              <h1>HackDMSV</h1>
+              <h1>IntelliPatch</h1>
               <span>Vulnerability Management</span>
             </div>
           </div>
@@ -1720,7 +1731,7 @@ body {
 
     try {
       const triggerResponse = await fetch(
-        `http://hackdmsv-env.eba-d9sffcsx.ap-south-1.elasticbeanstalk.com/trigger_report?target=${encodeURIComponent(
+        `http://localhost:8000/trigger_report?target=${encodeURIComponent(
           inputValue
         )}`,
         {
@@ -1812,7 +1823,7 @@ body {
     pollInterval = setInterval(async () => {
       try {
         const statusRes = await fetch(
-          `http://hackdmsv-env.eba-d9sffcsx.ap-south-1.elasticbeanstalk.com/status_report/${reportId}`
+          `http://localhost:8000/status_report/${reportId}`
         );
 
         if (!statusRes.ok) {
@@ -1857,7 +1868,7 @@ body {
   async function showResults(reportId) {
     try {
       const pdfRes = await fetch(
-        `http://hackdmsv-env.eba-d9sffcsx.ap-south-1.elasticbeanstalk.com/get_report/${reportId}`
+        `http://localhost:8000/get_report/${reportId}`
       );
 
       if (!pdfRes.ok) {
@@ -1925,7 +1936,7 @@ body {
     if (navigator.share) {
       navigator
         .share({
-          title: "HackDMSV Security Report",
+          title: "IntelliPatch Security Report",
           text: "Check out this security vulnerability report",
           url: window.location.href,
         })
@@ -1969,7 +1980,7 @@ body {
           }
 
           const response = await fetch(
-            `http://hackdmsv-env.eba-d9sffcsx.ap-south-1.elasticbeanstalk.com/query_report/${encodeURIComponent(
+            `http://localhost:8000/query_report/${encodeURIComponent(
               currentReportId
             )}?question=${encodeURIComponent(userMsg)}`,
             {
