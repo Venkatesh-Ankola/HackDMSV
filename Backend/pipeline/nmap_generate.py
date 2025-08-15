@@ -6,6 +6,9 @@ import requests
 import time
 from dotenv import load_dotenv
 import os
+import xml.etree.ElementTree as ET
+from gradio_client import Client
+
 
 load_dotenv()
 NVD_API_KEY = os.getenv("NVD_API_KEY")
@@ -130,6 +133,50 @@ def fetch_cves(cpe, kev_ids, limit=5):
     except Exception as e:
         print(f"Error fetching CVEs for {cpe}: {e}")
         return []
+    
+def parse_ports(xml_path):
+    if not os.path.isfile(xml_path):
+        raise FileNotFoundError(f"XML file not found: {xml_path}")
+
+    with open(xml_path, "r", encoding="utf-8") as file:
+        tree = ET.parse(file)
+    root = tree.getroot()
+    results = []
+    for host in root.findall("host"):
+        addr_elem = host.find("address")
+        ip = addr_elem.get("addr") if addr_elem is not None else "unknown"
+
+        ports_elem = host.find("ports")
+        ports_list = []
+        if ports_elem is not None:
+            for port in ports_elem.findall("port"):
+                proto = port.get("protocol", "tcp")
+                portid = port.get("portid", "unknown")
+                service_elem = port.find("service")
+                service_name = service_elem.get("name") if service_elem is not None else "unknown"
+                ports_list.append(f"{portid}/{proto}/{service_name}")
+
+        results.append({"ip": ip, "ports": ports_list})
+    return results
+
+def format_for_lora(scan_results):
+    text = "The following ports of hosts were scanned:\n\n"
+    for r in scan_results:
+        text += f"Host: {r['ip']}\n"
+        for p in r["ports"]:
+            text += f"- {p}\n"
+        text += "\n"
+    return text.strip()
+
+def generate_response(system_msg: str, user_msg: str, max_tokens: int = 512) -> str:
+    client = Client("sushanrai/phi3-cybersec-advisor-lora-inference")
+    result = client.predict(
+        system_prompt=system_msg,
+        user_prompt=user_msg,
+        max_new_tokens=max_tokens,
+        api_name="/predict"
+    )
+    return result
 
 def parse_nmap_xml(xml_path, kev_ids):
     with open(xml_path, 'r') as f:
@@ -174,7 +221,14 @@ def parse_nmap_xml(xml_path, kev_ids):
                     "cpe": "New",
                     "vulnerabilities": vulns if vulns else []
                 })
-    return results
+    scan_results = parse_ports(xml_path)
+    formatted_input = format_for_lora(scan_results)
+    system_msg = "You are a cybersecurity advisor. Provide mitigation steps for the given open ports without using JSON."
+    print(f"Formatted input for LLM: {formatted_input}")
+    output = generate_response(system_msg, formatted_input)
+    phi3_output = output.replace(system_msg, "").replace(formatted_input, "").strip()
+    print(f"Generated response: {phi3_output}")
+    return results, phi3_output
 
 def run_scan_and_parse(target_ip):
     run_nmap(target_ip)

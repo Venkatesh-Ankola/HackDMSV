@@ -108,7 +108,7 @@ class PDFReport(FPDF):
         self.set_font("Arial", '', 11)
         self.multi_cell(0, 10, summary_text)
 
-def generate_pdf_report(data, llm_summary, short_summaries, output_path="data/Vulnerability_Report.pdf"):
+def generate_pdf_report(data, llm_summary, short_summaries, phi3_output, output_path="data/Vulnerability_Report.pdf"):
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     pdf = PDFReport()
 
@@ -127,6 +127,13 @@ def generate_pdf_report(data, llm_summary, short_summaries, output_path="data/Vu
         pdf.add_table_header()
         for vuln, service in all_vulns:
             pdf.add_table_row(vuln, service)
+
+        if phi3_output:
+            pdf.ln(5)
+            pdf.set_font("Arial", 'B', 14)
+            pdf.cell(0, 10, "Security Recommendations for Open Ports", ln=True)
+            pdf.set_font("Arial", '', 11)
+            pdf.multi_cell(0, 10, phi3_output)
 
     pdf.add_detailed_section(data)
     pdf.add_summary(llm_summary)
